@@ -1,23 +1,37 @@
-import logo from './logo.svg';
+
+import { useEffect, useState } from 'react';
 import './App.css';
+import axios from 'axios';
+import { usePosition } from 'use-position';
+import HavaDurumu from './component/HavaDurumu';
 
 function App() {
+  const [weather, setWeather] = useState('');
+  const {
+    latitude,
+    longitude,
+  } = usePosition();
+  const getWeather = async (lon, lat) => {
+    const key = process.env.REACT_APP_WEATHER_API_KEY;
+    const lang = navigator.language.split("-")[0];
+    try {
+      const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&lang=${lang}&units=metric&appid=${key}`)
+      setWeather(data);
+    } catch {
+      return (
+        <div>Loading..</div>
+      )
+    }
+  };
+  useEffect(() => {
+    longitude && latitude && getWeather(longitude, latitude);
+  }, [latitude, longitude])
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className='App-header'>
+        Hava Durumu
+        <HavaDurumu hava={weather} />
+      </div>
     </div>
   );
 }
